@@ -1,7 +1,10 @@
 """
 This script generate data
 """
+import os
+import sys
 from methods import *
+
 mat_dir = '_matrices'
 if os.path.isdir( os.path.join( '.', mat_dir)):
     shutil.rmtree( mat_dir )
