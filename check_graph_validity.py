@@ -1,9 +1,14 @@
 #Checking the validity of a graph as a transport system
 import numpy as np
 from numpy import linalg as LA
-#import matplotlib.pyplot as plt
-#from mpl_toolkits.mplot3d import Axes3D
 import timeit
+import pylab
+
+edge_range = []
+node_range = []
+edge_avg = []
+num_edges_list = []
+vertices = []
 
 #Generating a graph (adjacency matrix) after seeding a pseudo random number generator
 def Adj(size, threshold, seed):
@@ -132,7 +137,7 @@ def CycleNumber(adj_mat):
     return cyc_num
     
 '''To generate a plot of average score as a function of number of nodes and number of edges.'''
-def GenGraphs(size, no_edges=None, sample_size=100):
+def GenGraphs(size, no_edges=None, sample_size=20):
     '''Generates a list with arrays of size nxn within it. These arrays
     represent valid strongly connected graphs with its 2-cuts removed, with a specific
     number of edges. 100 arrays need to be sampled.'''
@@ -144,7 +149,7 @@ def GenGraphs(size, no_edges=None, sample_size=100):
         while isValidGraph(a)[0] == False:
             i += 1
             a = Adj(size, 0.6, i) #I am setting a threshold of 0.6 so that I have a higher chance of getting a valid graph.
-	    print i, a
+	    #print i, a
         if no_edges != None:
             if np.sum(a) == no_edges:
                 valid_graphs.append(a)
@@ -217,75 +222,107 @@ def EdgesRange(lst):
 
 start_time = timeit.default_timer()
     
-'''For reference'''
-edge_range = []
-edge_avg = []
-num_edges_list = []
-for i in range(6,15,1):
-    graph_samples = GenGraphs(i)
-    num_edges = NumEdges(graph_samples)
-    num_edges_list.append(num_edges)
-    edge_range.append(EdgesRange(num_edges))
-    edge_avg.append(AvgEdges(num_edges))
+###'''For reference'''
+###edge_range = []
+###edge_avg = []
+###num_edges_list = []
+###for i in range(6,15,1):
+###    graph_samples = GenGraphs(i)
+###    num_edges = NumEdges(graph_samples)
+###    num_edges_list.append(num_edges)
+###    edge_range.append(EdgesRange(num_edges))
+###    edge_avg.append(AvgEdges(num_edges))
+###    
+###    
+###'''Complete dataset to plot.'''
+###   
+###elapsed = timeit.default_timer() - start_time
+###
+###'''vert = []
+###for x in vertices:
+###    vert.append(x[:])
+###for ind, x in enumerate(vert):
+###    x.append((edge_range[ind][1]+1, 0))
+###    x.insert(0, (edge_range[ind][0]-1,0))
+###    
+###fig = plt.figure()
+###ax = fig.add_subplot(111, projection='3d')
+###
+###def cc(arg):
+###    return colorConverter.to_rgba(arg, alpha=0.6)
+###    
+###poly = PolyCollection(vert, facecolors=[cc('r'), cc('g'), cc('b')])
+###                                         
+###poly.set_alpha(0.7)
+###ax.add_collection3d(poly, zs=xs, zdir='y')
+###
+###ax.set_xlabel('No. of edges')
+###ax.set_xlim3d(0, 40)
+###ax.set_ylabel('No. of nodes')
+###ax.set_ylim3d(3, 8)
+###ax.set_zlabel('Average no. of paths')
+###ax.set_zlim3d(0,400)
+###
+###plt.show()
+###
+###
+###def Scores(graph_list):
+###    scores = []
+###    for mat in graph_list:
+###        scores.append(TotalPaths(mat))
+###    return scores
+###
+###scores = Scores(GenGraphs(4, 8, 500))
+###path_range = (min(scores),max(scores))
+###no_paths = []
+###no_graphs_per_path = []
+###for i in range(path_range[0], path_range[1]+1):
+###    no_paths.append(i)
+###    no_graphs_per_path.append(scores.count(i))
+###    
+###plt.plot(no_paths,no_graphs_per_path, 'r--')'''
+###
+
+def generate_graphs( min_nodes, max_nodes ):
+    global edge_range, node_range
+    global num_edges_list, edge_avg
+    global vertices
+    node_range = range(min_nodes, max_nodes, 1)
+    for i in node_range:
+        print("[INFO] at i = %s" % i)
+        graph_samples = GenGraphs(i)
+        num_edges = NumEdges(graph_samples)
+        num_edges_list.append(num_edges)
+        edge_range.append(EdgesRange(num_edges))
+        edge_avg.append(AvgEdges(num_edges))
+
+    for ind, x in enumerate(node_range):
+        no_paths = []
+        ys = range(edge_range[ind][0],edge_range[ind][1]+1)
+        for y in ys:
+            print("[INFO] x=%s, y=%s" % (x, y))
+            if y in num_edges_list[ind]:
+                #Generate a sample set of graphs with i nodes and y edges
+                sample_set = GenGraphs(x, y) 
+                print("++ Sample set: %s" % sample_set[0] )
+                no_paths.append(AvgPaths(sample_set))
+        zs = list(zip(ys,no_paths))
+        vertices.append(zs)
+    print("Vertices: %s" % vertices)
+
+def plots( min_nodes, max_nodes):
     
-    
-'''Complete dataset to plot.'''
-vertices = []
-xs = range(6,15,1)
-for ind, x in enumerate(xs):
-    no_paths = []
-    ys = range(edge_range[ind][0],edge_range[ind][1]+1)
-    for y in ys:
-        print y
-        if y in num_edges_list[ind]:
-            sample_set = GenGraphs(x, y) #Generate a sample set of graphs with i nodes and y edges
-            print sample_set[0]
-            no_paths.append(AvgPaths(sample_set))
-    zs = list(zip(ys,no_paths))
-    vertices.append(zs)
-    
-elapsed = timeit.default_timer() - start_time
+    fig = pylab.figure()
+    ax = fig.gca(projection='3d')
 
-'''vert = []
-for x in vertices:
-    vert.append(x[:])
-for ind, x in enumerate(vert):
-    x.append((edge_range[ind][1]+1, 0))
-    x.insert(0, (edge_range[ind][0]-1,0))
-    
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+    global vertices
+    global node_range
+    for v in vertices:
+        print v
 
-def cc(arg):
-    return colorConverter.to_rgba(arg, alpha=0.6)
-    
-poly = PolyCollection(vert, facecolors=[cc('r'), cc('g'), cc('b')])
-                                         
-poly.set_alpha(0.7)
-ax.add_collection3d(poly, zs=xs, zdir='y')
+def main():
+    generate_graphs( min_nodes = 5, max_nodes = 6 )
+    plots( min_nodes = 5, max_nodes = 6)
 
-ax.set_xlabel('No. of edges')
-ax.set_xlim3d(0, 40)
-ax.set_ylabel('No. of nodes')
-ax.set_ylim3d(3, 8)
-ax.set_zlabel('Average no. of paths')
-ax.set_zlim3d(0,400)
-
-plt.show()
-
-
-def Scores(graph_list):
-    scores = []
-    for mat in graph_list:
-        scores.append(TotalPaths(mat))
-    return scores
-
-scores = Scores(GenGraphs(4, 8, 500))
-path_range = (min(scores),max(scores))
-no_paths = []
-no_graphs_per_path = []
-for i in range(path_range[0], path_range[1]+1):
-    no_paths.append(i)
-    no_graphs_per_path.append(scores.count(i))
-    
-plt.plot(no_paths,no_graphs_per_path, 'r--')'''
+if __name__ == '__main__':
+    main()

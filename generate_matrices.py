@@ -3,6 +3,8 @@ This script generate data
 """
 import os
 import sys
+import shutil
+
 from methods import *
 
 mat_dir = '_matrices'
