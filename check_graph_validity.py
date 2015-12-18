@@ -308,21 +308,14 @@ def generate_graphs( min_nodes, max_nodes ):
                 no_paths.append(AvgPaths(sample_set))
         zs = list(zip(ys,no_paths))
         vertices.append(zs)
-    print("Vertices: %s" % vertices)
-
-def plots( min_nodes, max_nodes):
-    
-    fig = pylab.figure()
-    ax = fig.gca(projection='3d')
-
-    global vertices
-    global node_range
-    for v in vertices:
-        print v
+    with open('results.txt', 'w') as f:
+        f.write('num_of_nodes : #paths\n')
+        for i, v in enumerate(vertices):
+            f.write('%s : %s\n' % (node_range[i], v))
+    print("Done writing data to results.txt")
 
 def main():
-    generate_graphs( min_nodes = 5, max_nodes = 6 )
-    plots( min_nodes = 5, max_nodes = 6)
+    generate_graphs( min_nodes = 5, max_nodes = 10 )
 
 if __name__ == '__main__':
     main()
