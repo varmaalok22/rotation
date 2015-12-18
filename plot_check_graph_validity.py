@@ -9,13 +9,15 @@ def main( ):
     lines = txt.split("\n")
     zs = []
     verts = []
-    for l in lines:
+    for l in lines[1:]:
         if not l.strip():
             continue
         numNode, paths = l.split(':')
         data = eval( paths )
         xvec, yvec = zip(*data)
-        plt.semilogy(xvec, yvec, label='#nodes=%s' % numNode)
+        plt.semilogy(xvec, yvec, 'o', label='#nodes=%s' % numNode)
+    plt.xlabel('No of edges')
+    plt.ylabel('Total num of paths')
     plt.legend(loc='best', framealpha=0.4)
     plt.show()
 
